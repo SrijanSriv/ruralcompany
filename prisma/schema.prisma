@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  service_id    Int       @id @default(autoincrement())
+  service_name  String
+  service_cost  Float
+  service_time  Int       // Determines slot size
+  providers     Provider[]
+  reservations  Reservation[]
+}
+
+model Provider { // provider is a person that does a service, e.g carpenter, plumber, etc
+  provider_id   Int        @id @default(autoincrement())
+  provider_name String
+  provider_phone String
+  service_id    Int
+  service       Service    @relation(fields: [service_id], references: [service_id])
+  reservations  Reservation[]
+}
+
+model Reservation {
+  reservation_id Int       @id @default(autoincrement())
+  service_id     Int
+  provider_id    Int
+  timeslot_start DateTime
+  timeslot_end   DateTime
+  total_cost     Float
+  service        Service   @relation(fields: [service_id], references: [service_id])
+  provider       Provider  @relation(fields: [provider_id], references: [provider_id])
+  user           User?     @relation(fields: [user_id], references: [user_id])
+  user_id        Int?
+}
+
+model User {
+  user_id   Int     @id @default(autoincrement())
+  username  String
+  email     String  @unique
+  password  String
+  reservations Reservation[]
+}
