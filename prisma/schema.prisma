@@ -18,8 +18,6 @@ model Facility {
   facility_name  String
   facility_cost  Float
   facility_time  Int       // Determines slot size
-  providers     Provider[]
-  reservations  Reservation[]
 }
 
 model Provider { // provider is a person that does a facility, e.g carpenter, plumber, etc
@@ -27,21 +25,17 @@ model Provider { // provider is a person that does a facility, e.g carpenter, pl
   provider_name String
   provider_phone String
   facility_id    Int
-  facility       Facility    @relation(fields: [facility_id], references: [facility_id])
-  reservations  Reservation[]
 }
 
 model Reservation {
-  reservation_id Int       @id @default(autoincrement())
+  reservation_id  Int       @id @default(autoincrement())
   facility_id     Int
-  provider_id    Int
-  timeslot_start DateTime
-  timeslot_end   DateTime
-  total_cost     Float
-  facility        Facility   @relation(fields: [facility_id], references: [facility_id])
-  provider       Provider  @relation(fields: [provider_id], references: [provider_id])
-  user           User?     @relation(fields: [user_id], references: [user_id])
-  user_id        Int?
+  provider_id     Int
+  reservation_date String
+  timeslot_start  Int
+  timeslot_end    Int
+  total_cost      Float
+  user_id         Int
 }
 
 model User {
@@ -49,5 +43,4 @@ model User {
   username  String
   email     String  @unique
   password  String
-  reservations Reservation[]
 }
