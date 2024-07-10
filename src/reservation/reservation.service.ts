@@ -14,14 +14,29 @@ function getDayToday() {
 export class ReservationService {
   constructor(private databaseService: DatabaseService) {}
   async create(
-    createReservationDto: Prisma.ReservationCreateInput,
+    createReservationDto: Prisma.ReservationCreateInput[],
     @Request() req,
   ) {
-    const reservation = createReservationDto;
     const user = req.user;
-    reservation.user_id = user.user_id;
-    return this.databaseService.reservation.create({
-      data: reservation,
+    const reservations = createReservationDto.map((reservation) => ({
+      ...reservation,
+      user_id: user.user_id,
+    }));
+    return this.databaseService.reservation.createMany({
+      data: reservations,
+    });
+  }
+
+  async updateMany(
+    updateReservationDto: Prisma.ReservationUpdateInput[],
+    user_id: number,
+  ) {
+    const reservations = updateReservationDto.map((reservation) => ({
+      ...reservation,
+      user_id: user_id,
+    }));
+    return this.databaseService.reservation.updateMany({
+      data: reservations,
     });
   }
 
@@ -49,9 +64,10 @@ export class ReservationService {
       });
 
     // Get the current time in hours
-    const currentHour = date === getDayToday() ? new Date().getHours() : 0;
+    const currentHour =
+      date || date === getDayToday() ? 0 : new Date().getHours();
     const startTime = Math.max(currentHour + 2, 10); // Start time is 2 hours from the current time OR from 10 AM
-    const endTime = 18; // Slots should not cross 6 PM
+    const endTime = 24; // Slots should not cross 6 PM
     const slotSize = facilityInfo.facility_time;
 
     // Define all possible slots based on the start time, end time, and slot size
@@ -60,6 +76,7 @@ export class ReservationService {
       const slotEnd = i + slotSize;
       if (slotEnd <= endTime) {
         allSlots.push({
+          date: date ? date : getDayToday(),
           start: i,
           end: slotEnd,
           providers: providersForFacility,
@@ -99,10 +116,17 @@ export class ReservationService {
       })
       .filter((slot) => slot.providers.length > 0); // Remove slots with no available providers
 
+    if (availableSlots.length === 0) {
+      availableSlots.push({
+        message: 'either its too late or all slots booked :( see you tomorrow!',
+      });
+    }
     return availableSlots;
   }
 
-  async findAllUserReservations(id: string) {
+  async findAllUserReservations(@Request() req) {
+    const user = req.user;
+    const id = user.user_id;
     return this.databaseService.reservation.findMany({
       where: { user_id: parseInt(id) },
     });

@@ -36,6 +36,8 @@ model Reservation {
   timeslot_end    Int
   total_cost      Float
   user_id         Int
+  payment_done    Boolean
+  created_at      DateTime  @default(now())
 }
 
 model User {

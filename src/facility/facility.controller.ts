@@ -6,13 +6,12 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { FacilityService } from './facility.service';
 import { Prisma } from '@prisma/client';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+// import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@UseGuards(JwtAuthGuard)
 @Controller('facility')
 export class FacilityController {
   constructor(private readonly facilityService: FacilityService) {}

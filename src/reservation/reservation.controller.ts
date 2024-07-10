@@ -26,19 +26,28 @@ export class ReservationController {
 
   // returns all the reservations for a particular user
   @UseGuards(JwtAuthGuard)
-  @Get('/user/:id')
-  findAllUserReservations(@Param('id') id: string) {
-    return this.reservationService.findAllUserReservations(id);
+  @Post('/user')
+  findAllUserReservations(@Request() req) {
+    return this.reservationService.findAllUserReservations(req);
   }
 
   // basic CRUD operations for a reservation
   @UseGuards(JwtAuthGuard)
   @Post()
   create(
-    @Body() createReservationDto: Prisma.ReservationCreateInput,
+    @Body() createReservationDto: Prisma.ReservationCreateInput[],
     @Request() req,
   ) {
     return this.reservationService.create(createReservationDto, req);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/many')
+  updateMany(
+    @Body() updateReservationDto: Prisma.ReservationUpdateInput[],
+    @Query('user_id') user_id: number,
+  ) {
+    return this.reservationService.updateMany(updateReservationDto, user_id);
   }
 
   @UseGuards(JwtAuthGuard)
